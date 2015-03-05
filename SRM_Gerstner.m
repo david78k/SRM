@@ -91,7 +91,7 @@ t = 0:10;
 
 g_e = data.g_e;
 g_i = data.g_i;
-% plot(g_e)
+plot(g_e)
 % hold on;
 % plot(g_i)
 % plot(data.v)

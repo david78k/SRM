@@ -17,6 +17,10 @@
 %  
 % The controller will receive the state of the system as a spike train, and will send out a control signal also as a spike train.
 
+%%%%%%%%%%%%%%% Membrane potential %%%%%%%%%%%%%%%%%
+% Choose AMPA for excitatory and GABA_A for inhibitory synapses. 
+% The most important constant is tau which should be 20msec and 10 msec respectively.
+
 % PSPs P(t) = (Q/(d*sqrt(t)))*exp((-beta*d^2)/t)*exp(-t/tau)
 % AHPs P(t) = R*exp(-t/gamma)
 % where R denotes the instantaneous fall in potential after a spike
@@ -25,9 +29,14 @@
 disp('SRM function')
 
 % number of inputs at each synapse
-N = 100; 
-i = 1:N;
-t = 0:0.1:100;
+% N = 100; 
+% i = 1:N;
+% dt = 0.001;     % 1 ms time step
+dt = 1;     % time step
+% t = 0:dt:0.1;   % for AMPA
+t = 0:dt:20;   % for AMPA
+% t = 0:dt:0.01;  % for GABA_A
+% t = 0:dt:100;  % for GABA_A
 
 % synaptic and axonal delays were combined and chosen from the realistic
 % range [0.4, 0.9] msec.
@@ -39,48 +48,107 @@ delay = 0.8;
 % The Q's at all synapses were scaled uniformly so that the average spike
 % rate of the neurons in the network lay in a realistic range (i.e., did
 % not exceed 20Hz).
-Q = 5.0;
+% Q = 1.0;    % max potential: 0.0668, 12neurons needed to fire
+Q = 5.0;    % max potential: 0.3924, 3neurons needed to fire
+% Q = 10.0;    % max potential: 0.8407, 2neurons needed to fire
 % distance of the synapse from the soma [1.0, 2.0]
 % 1.5 for excitatory, 1.2 for inhibitory synapses
 d = 1.5;
 % beta and tau control the rate of rise and fall of the PSP
-% AMPA
+
+% AMPA for excitatory
 beta = 1.0;
-tau = 20; % on exceitatory
-% tau = 10; % on inhibitory
+% tau = 0.02; % 20ms on exceitatory
+tau = 20; % 20ms on exceitatory
+% tau = 10; % 10ms on inhibitory
+
+% GABA_A for inhibitory
+% beta = 1.1;
+% tau = 0.01; % 10ms
+
 % GABA_B
 % beta = 50.0;
 % tau = 100;
-% beta = 1000.0;
-% tau = 2000;
-% PSPs = (Q./(d*sqrt(t))).*exp((-beta*d*d)./t).*exp(-t/tau);
-PSPs = 100*(Q./(d*sqrt(t))).*exp((-beta*power(d,2))./t).*exp(-t/tau);
-% PSPs = (Q/d./sqrt(t)).*exp(-(beta*d^2)./t).*exp(-t/tau);
+
+disp([ 'tau = ' num2str(tau) ', Q = ' num2str(Q) ', d = ' num2str(d) ', beta = ' num2str(beta)]);
+
+PSPs = 0;
+for i = 1:3
+    PSPs = PSPs + (Q/d./sqrt(t)).*exp(-(beta*d^2)./t).*exp(-t/tau);
+end
 
 % AHPs
 R = -1000.0; % default
-R = -100;
-gamma = 1.2;
-threshold = 1.0;
-AHPs = R*exp(-t/gamma);
+% gamma = 0.0012; % 1.2 msec
+gamma = 1.2; % 1.2 msec
+AHP = R*exp(-t/gamma);
 
-plot(t, PSPs)
+potential = PSPs + AHP;
+
+% plot(t, PSPs)
 % hold on;
-plot(t, AHPs)
-potential = PSPs + AHPs;
+% plot(t, AHP)
 % hold on;
 plot(t, potential)
+
+disp([max(PSPs)  max(AHP) max(potential)])
 
 % number of spikes at each synapse without weights
 M = 100;
 j = 1:M;
 
-% for (i = 0; i < 
 % potential = sum(f_i, g);
-thresh = 0;
-if (potential > thresh)
-    disp('spike');
+threshold = 1.0;
+if (max(potential) > threshold)
+    disp('fired');
 end
+
+%%%%%%%%%%%%%%% function Force %%%%%%%%%%%%%%%%%
+% clf; clear all;
+
+% fmax = 1000; % F(-7.3576, 7.3576)
+% fmax = 2000; % F(-14.7152, 14.7152)
+% fmax = 10000; % F(-73.5759, 73.5759)
+% dt = 0.02; % 20ms, tau = 1, Fmax = 0.3679, period = 9.18sec 460steps (300-400 ok)
+% dt = 0.001; % 1ms, tau = 1, Fmax = 0.36788, period = 9.199sec, 9200steps
+% dt = 0.001; % 1ms, tau = 0.02, Fmax = 0.0073576, period = 0.179sec, 180steps
+% tau = 1; % 
+% tau = 0.5; % dt = 0.02, Fmax = 0.18394, period = 4.38sec, 220steps
+% tau = 0.02; % dt = 0.001, Fmax = 0.0073576, period = 0.18sec, 10steps
+% last_steps = 200; % 460, 8000, 9200
+% total_steps = 2000; % 1sec
+% 
+% steps = []; F = []; push = [];
+
+% tic
+% for step = 1:(total_steps)
+% %     step
+% %     endpoint = min(last_steps, step + last_steps);
+%     startpoint = mod(step, last_steps);
+%     endpoint = startpoint + last_steps - 1;
+%     if startpoint == 1   
+%         push = mod(randi(3),3) - 1;
+%         for i = startpoint: endpoint
+%             steps(step + i) = (step + i - 1)*dt;
+%             t = steps(i);            
+% %             F(step + i) = t*exp(-t/tau);
+%             F(step + i) = fmax * push * t*exp(-t/tau);
+% %             steps(step + i) = step * dt;
+% %             F(step + i) = step+ i;
+%         end
+%     end
+% %     step = step + 1;
+% end
+% 
+% disp(['steps(end): ' num2str(steps(end)) ', F(end): ' num2str(F(end)) ', F(' num2str(min(F)) ', ' num2str(max(F)) ')' ] );
+% 
+% hold on;
+% plot(steps,F);
+% ylabel('Force');
+% xlabel('time');
+% hold off;
+% 
+% toc
 
 %%%%%%%%%%%%%%% loading data %%%%%%%%%%%%%%%%%
 % data = load('data_gui_08.mat');
