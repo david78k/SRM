@@ -34,9 +34,9 @@ disp('SRM function')
 % dt = 0.001;     % 1 ms time step
 dt = 1;     % time step
 % t = 0:dt:0.1;   % for AMPA
-t = 0:dt:20;   % for AMPA
+t = 0:dt:25;   % for AMPA. (15, -0.0037267), (20, -5.7777e-05), (25, -8.9577e-07)
 % t = 0:dt:0.01;  % for GABA_A
-% t = 0:dt:100;  % for GABA_A
+% t = 0:dt:180;  % for GABA_A, (100, 0.006588), (150, 0.00044487), (170, 0.000154), (180, 9.0842e-05) (200, 3.1743e-05)
 
 % synaptic and axonal delays were combined and chosen from the realistic
 % range [0.4, 0.9] msec.
@@ -85,13 +85,23 @@ AHP = R*exp(-t/gamma);
 
 potential = PSPs + AHP;
 
-% plot(t, PSPs)
-% hold on;
-% plot(t, AHP)
-% hold on;
+subplot(3,1,1);
+plot(t, PSPs)
+ylabel('PSPs');
+hold on;
+subplot(3,1,2);
+plot(t, AHP)
+ylabel('AHP');
+hold on;
+subplot(3,1,3);
 plot(t, potential)
 
-disp([max(PSPs)  max(AHP) max(potential)])
+ylabel('potential');
+xlabel('time (ms)');
+
+disp(['PSPs: [' num2str(min(PSPs)) ', ' num2str(max(PSPs)) ')'])
+disp(['AHPs: [' num2str(min(AHP)) ', ' num2str(max(AHP)) ')'])
+disp(['potential: [' num2str(min(potential)) ', ' num2str(max(potential)) ')'])
 
 % number of spikes at each synapse without weights
 M = 100;
