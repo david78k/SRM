@@ -13,7 +13,8 @@ push = [];
 
 tic
 
-for step = 1:6000,
+% for step = 1:6000,
+for step = 1:200,
     steps(step) = (step - 1)*tau;
 %     ypoints(i) = (i + 100 )*tau; % old 100 steps before
 %     fpoints(i) = (i + 200)*tau;  % old 200 steps past

@@ -31,12 +31,13 @@ disp('SRM function')
 % number of inputs at each synapse
 % N = 100; 
 % i = 1:N;
+totalsteps = 70;
 % dt = 0.001;     % 1 ms time step
 dt = 1;     % time step
 % t = 0:dt:0.1;   % for AMPA
-t = 0:dt:25;   % for AMPA. (15, -0.0037267), (20, -5.7777e-05), (25, -8.9577e-07)
+% t = 0:dt:25;   % for AMPA. (15, -0.0037267), (20, -5.7777e-05), (25, -8.9577e-07)
 % t = 0:dt:0.01;  % for GABA_A
-% t = 0:dt:180;  % for GABA_A, (100, 0.006588), (150, 0.00044487), (170, 0.000154), (180, 9.0842e-05) (200, 3.1743e-05)
+t = 0:dt:totalsteps;  % for GABA_A, (100, 0.006588), (150, 0.00044487), (170, 0.000154), (180, 9.0842e-05) (200, 3.1743e-05)
 
 % synaptic and axonal delays were combined and chosen from the realistic
 % range [0.4, 0.9] msec.
@@ -49,8 +50,8 @@ delay = 0.8;
 % rate of the neurons in the network lay in a realistic range (i.e., did
 % not exceed 20Hz).
 % Q = 1.0;    % max potential: 0.0668, 12neurons needed to fire
-Q = 5.0;    % max potential: 0.3924, 3neurons needed to fire
-% Q = 10.0;    % max potential: 0.8407, 2neurons needed to fire
+% Q = 5.0;    % max potential: 0.3924, 3neurons needed to fire
+Q = 10.0;    % max potential: 0.8407, 2neurons needed to fire
 % distance of the synapse from the soma [1.0, 2.0]
 % 1.5 for excitatory, 1.2 for inhibitory synapses
 d = 1.5;
@@ -70,7 +71,7 @@ tau = 20; % 20ms on exceitatory
 % beta = 50.0;
 % tau = 100;
 
-disp([ 'tau = ' num2str(tau) ', Q = ' num2str(Q) ', d = ' num2str(d) ', beta = ' num2str(beta)]);
+disp([ 'total steps = ' num2str(totalsteps) ', tau = ' num2str(tau) ', Q = ' num2str(Q) ', d = ' num2str(d) ', beta = ' num2str(beta)]);
 
 PSPs = 0;
 for i = 1:3
@@ -99,9 +100,10 @@ plot(t, potential)
 ylabel('potential');
 xlabel('time (ms)');
 
-disp(['PSPs: [' num2str(min(PSPs)) ', ' num2str(max(PSPs)) ')'])
-disp(['AHPs: [' num2str(min(AHP)) ', ' num2str(max(AHP)) ')'])
-disp(['potential: [' num2str(min(potential)) ', ' num2str(max(potential)) ')'])
+% [min, max] end
+disp(['PSPs: [' num2str(min(PSPs)) ', ' num2str(max(PSPs)) '] ' num2str(PSPs(end)) ])
+disp(['AHPs: [' num2str(min(AHP)) ', ' num2str(max(AHP)) '] ' num2str(AHP(end)) ])
+disp(['potential: [' num2str(min(potential)) ', ' num2str(max(potential)) '] ' num2str(potential(end)) ])
 
 % number of spikes at each synapse without weights
 M = 100;
